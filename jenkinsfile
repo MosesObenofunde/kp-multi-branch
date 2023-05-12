@@ -22,7 +22,7 @@ pipeline {
 
         stage('Code Checkout') {
                     steps {
-                    git branch: 'develop',
+                    git branch: 'stage',
                         credentialsId: 'd2581bd8-4dcc-4c59-bc19-73fb6540aa15',
                         url: 'https://github.com/MosesObenofunde/multi-branch.git'
                     }
@@ -45,16 +45,17 @@ pipeline {
         }
 
         stage('Build Deploy Code') {
-            when {
-                branch 'develop'
-            }
+            
             steps {
                 sh """
-                echo "Building Artifact"
+                echo "list user"
+                who
+                whoami
+                which echo
                 """
 
                 sh """
-                echo "Deploying Code"
+                echo "listing NameSpaces"
                 /opt/homebrew/bin/kubectl create -f namespace.yml
                 """
             }
