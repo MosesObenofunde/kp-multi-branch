@@ -22,7 +22,7 @@ pipeline {
 
         stage('Code Checkout') {
                     steps {
-                    git branch: 'develop',
+                    git branch: 'production',
                         credentialsId: 'd2581bd8-4dcc-4c59-bc19-73fb6540aa15',
                         url: 'https://github.com/MosesObenofunde/multi-branch.git'
                     }
@@ -39,22 +39,85 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 sh """
-                echo "Running Code Analysis"
+                echo "listing repos"
+                ls
+                pwd
                 """
             }
         }
 
         stage('Build Deploy Code') {
-            when {
-                branch 'develop'
-            }
+            
             steps {
                 sh """
                 echo "Building Artifact"
                 """
 
                 sh """
-                echo "Deploying Code"
+                echo "Creating Namespace"
+                /opt/homebrew/bin/kubectl create -f namespace.yml
+                """
+            }
+        }
+
+    }   
+}pipeline {
+
+    agent any
+
+    options {
+        buildDiscarder logRotator( 
+                    daysToKeepStr: '16', 
+                    numToKeepStr: '10'
+            )
+    }
+
+    stages {
+        
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+                sh """
+                echo "Cleaned Up Workspace For Project"
+                """
+            }
+        }
+
+        stage('Code Checkout') {
+                    steps {
+                    git branch: 'production',
+                        credentialsId: 'd2581bd8-4dcc-4c59-bc19-73fb6540aa15',
+                        url: 'https://github.com/MosesObenofunde/multi-branch.git'
+                    }
+                }
+
+        stage(' Unit Testing') {
+            steps {
+                sh """
+                echo "Running Unit Tests"
+                """
+            }
+        }
+
+        stage('Code Analysis') {
+            steps {
+                sh """
+                echo "listing repos"
+                ls
+                pwd
+                """
+            }
+        }
+
+        stage('Build Deploy Code') {
+            
+            steps {
+                sh """
+                echo "Building Artifact"
+                """
+
+                sh """
+                echo "Creating Namespace"
                 /opt/homebrew/bin/kubectl create -f namespace.yml
                 """
             }
